@@ -14,13 +14,19 @@ $ pip install python-pptx
 
 ## Windows Installation
 
-Windows users can download and run the EXE file included in the `bin/` directory (built with `C:\Python27\scripts\pyinstaller --onefile pptxindex.py`).  Copy this file to a location in your PATH (I copy to `C:\Tools` - YMMV).
+Windows users will need to install Python before using pptxindex.  Download and install Python 2.7 from https://www.python.org/downloads/windows.  After installation, add `C:\Python27` and `C:\Python27\scripts` to your PATH environment variable to make it easier to run from the command line.
 
+After installing Python 2.7, run the `pip` utility in `C:\Python27\scripts` to install the python-pptx and python-docx dependencies:
+
+```
+C:\Python27\scripts> pip install python-docx
+C:\Python27\scripts> pip install python-pptx
+```
 
 ## Usage
 
 ```
-$ pptxindex.py
+$ python pptxindex.py
 Usage: pptxindex.py -c <CONCORDANCE> [-o WORDFILE] [-i WORDFILE] [PPTX FILES]
                           [-h] [-t]
      -c <CONCORDANCE>    Specify the concordance filename
