@@ -194,6 +194,7 @@ def showconcordancehits(concordancehits, concordance):
 
 
 def usage(status=0):
+    print "pptxindex v1.0"
     print "Usage: pptxindex.py -c <CONCORDANCE> [-o WORDFILE] [-i WORDFILE] [PPTX FILES]"
     print "                          [-h] [-t]"
     print "     -c <CONCORDANCE>    Specify the concordance filename"
