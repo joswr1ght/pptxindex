@@ -1,0 +1,12 @@
+# Comments are ignored
+
+# Blank lines are ignored too
+# See README.md for more tips on building a concordance file.
+Apple Configurator
+iTunes
+Cain & Abel
+SQL Injection;"sql injection" in page
+SQL Injection, Testing Risk;"sql injection" in page and "testing risk" in page
+Client Side Injection Attacks; ("client side injection" in page or "csi" in page) and "attack" in page
+Burp Suite;page.count("burp suite") > 1
+Penetration Testing, Mobile;("pentest" in page or "pen test" in page or "penetration test" in page) and (booknum == 2 or booknum == 3)
