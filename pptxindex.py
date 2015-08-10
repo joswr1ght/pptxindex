@@ -95,6 +95,7 @@ def parseslidetext(prs, words, booknum):
                         continue
 
         # SEC575 Specific -- skip slides that are course outline slides
+        pdb.set_trace()
         if text_runs.find("Course") and text_runs.find("Roadmap"): 
             words[str(booknum)+ ":" + str(page)] = ""
         else:
@@ -194,7 +195,7 @@ def showconcordancehits(concordancehits, concordance):
 
 
 def usage(status=0):
-    print "pptxindex v1.0"
+    print "pptxindex v1.0.1"
     print "Usage: pptxindex.py -c <CONCORDANCE> [-o WORDFILE] [-i WORDFILE] [PPTX FILES]"
     print "                          [-h] [-t]"
     print "     -c <CONCORDANCE>    Specify the concordance filename"
@@ -265,6 +266,7 @@ if __name__ == "__main__":
     if len(pptxfiles) == 0:
         sys.stderr.write("No matching PPTX files found.\n")
         sys.exit(1)
+    pptxfiles.sort()
     if verbose:
         print("Processing PPTX files: %s")%' '.join(os.path.basename(x) for x in pptxfiles)
 
