@@ -130,7 +130,7 @@ In the first example from the concordance file, the string "SQL Injection" will 
 
 In the second example from the concordance file, the string "SQL Injection, Testing Risk" will similarly be added to the index if the Python expression to the right of the semi-colon evaluates to True.  Here, the expression will be True if the string "sql injection" is present in any given PowerPoint page, and if "testing risk" is also present in the same page.
 
-**Note**: When creating concordance rules and referring to the `page` string variable, your search keyword should be specified lowercase. The concordance entry '`SQL Injectionk;"SQL injection" or "SQLi"`' will return no hits since the strings in the `page` variable are always lowercase.
+**Note**: When creating concordance rules and referring to the `page` string variable, your search keyword should be specified lowercase. The concordance entry `SQL Injection;"SQL injection" or "SQLi"` will not return any hits since the strings in the `page` variable are always lowercase.
 
 ### Advanced Concordance Entry Matching
 
