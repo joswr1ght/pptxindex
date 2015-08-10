@@ -95,7 +95,6 @@ def parseslidetext(prs, words, booknum):
                         continue
 
         # SEC575 Specific -- skip slides that are course outline slides
-        pdb.set_trace()
         if text_runs.find("Course") and text_runs.find("Roadmap"): 
             words[str(booknum)+ ":" + str(page)] = ""
         else:
