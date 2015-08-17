@@ -5,22 +5,20 @@ Using a concordance file of keywords or Python expressions, build a Microsoft Wo
 
 ## Linux or OS X Installation
 
-On Linux or Mac OS X systems, install the `python-pptx` and `python-docx` packages using `pip`:
+On Linux or Mac OS X systems, install the `python-docx` package using `pip`:
 
 ```
 $ pip install python-docx
-$ pip install python-pptx
 ```
 
 ## Windows Installation
 
 Windows users will need to install Python before using pptxindex.  Download and install Python 2.7 from https://www.python.org/downloads/windows.  After installation, add `C:\Python27` and `C:\Python27\scripts` to your PATH environment variable to make it easier to run from the command line.
 
-After installing Python 2.7, run the `pip` utility in `C:\Python27\scripts` to install the python-pptx and python-docx dependencies:
+After installing Python 2.7, run the `pip` utility in `C:\Python27\scripts` to install the python-docx dependencies:
 
 ```
 C:\Python27\scripts> pip install python-docx
-C:\Python27\scripts> pip install python-pptx
 ```
 
 ## Usage

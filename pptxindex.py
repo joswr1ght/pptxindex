@@ -3,11 +3,9 @@
 # -*- coding: utf-8 -*-
 #
 
-from pptx import Presentation
 from docx import Document
 from itertools import groupby
 from operator import itemgetter
-from zipfile import ZipFile
 from xml.dom.minidom import parse
 
 import sys
@@ -20,10 +18,41 @@ import operator
 import getopt
 import pdb
 import string
+import zipfile
 
-def parseslidenotes(pptxfile, words, booknum):
+
+
+def parseslidecontent(pptxfile, words, booknum, verbose=False):
+    skippages = []
     tmpd = tempfile.mkdtemp()
-    ZipFile(pptxfile).extractall(path=tmpd, pwd=None)
+    zipfile.ZipFile(pptxfile).extractall(path=tmpd, pwd=None)
+
+    # Parse slide content first
+    path = tmpd + '/ppt/slides/'
+    for infile in glob.glob(os.path.join(path, '*.xml')):
+        #parse each XML notes file from the notes folder.
+        dom = parse(infile)
+
+        noteslist = dom.getElementsByTagName('a:t')
+        page = int(re.sub(r'\D', "", infile.split("/")[-1]))
+        text = ''
+
+        for node in noteslist:
+            xmlTag = node.toxml()
+            xmlData = xmlTag.replace('<a:t>', '').replace('</a:t>', '')
+            text += " " + xmlData
+
+        # Convert to ascii to simplify
+        text = text.encode('ascii', 'ignore')
+        if "Course Roadmap" in text:
+            if verbose:
+                print "Skipping page %d, \"Course Roadmap\" slide."%page
+            skippages.append(page)
+            words[str(booknum) + ":" + str(page)] = ''
+        else:
+            words[str(booknum) + ":" + str(page)] = text
+
+    # Next, parse notes content, skipping pages previously identified
     path = tmpd + '/ppt/notesSlides/'
     for infile in glob.glob(os.path.join(path, '*.xml')):
         #parse each XML notes file from the notes folder.
@@ -32,35 +61,17 @@ def parseslidenotes(pptxfile, words, booknum):
 
         # The page number is part of the filename
         page = int(re.sub(r'\D', "", infile.split("/")[-1]))
+        if page in skippages:
+            # Skip this page previously identified with slide text
+            continue
 
         # Create dictionary entry without content
-        words[str(booknum) + ":" + str(page)] = ""
         text = ''
 
         for node in noteslist:
             xmlTag = node.toxml()
             xmlData = xmlTag.replace('<a:t>', '').replace('</a:t>', '')
             #concatenate the xmlData to the text for the particular slideNumber index.
-            text += " " + xmlData
-
-        # Convert to ascii to simplify
-        text = text.encode('ascii', 'ignore')
-        words[str(booknum) + ":" + str(page)] = " " + text
-
-
-    path = tmpd + '/ppt/slides/'
-    for infile in glob.glob(os.path.join(path, '*.xml')):
-        #parse each XML notes file from the notes folder.
-        dom = parse(infile)
-
-        noteslist = dom.getElementsByTagName('a:t')
-
-        page = int(re.sub(r'\D', "", infile.split("/")[-1]))
-        text = ''
-
-        for node in noteslist:
-            xmlTag = node.toxml()
-            xmlData = xmlTag.replace('<a:t>', '').replace('</a:t>', '')
             text += " " + xmlData
 
         # Convert to ascii to simplify
@@ -75,31 +86,8 @@ def parseslidenotes(pptxfile, words, booknum):
         words[page] = ''.join(ch for ch in words[page] if ch not in set([',','(',')']))
         words[page] = re.sub('\. ', " ", words[page])
         words[page] = ' '.join(words[page].split())
-
     return words
 
-# Parse the text on slides using the python-pptx module, return words
-def parseslidetext(prs, words, booknum):
-    page = 0
-    for slide in prs.slides:
-        page += 1
-        text_runs = ""
-        for shape in slide.shapes:
-            if not shape.has_text_frame:
-                continue
-            for paragraph in shape.text_frame.paragraphs:
-                for run in paragraph.runs:
-                    try:
-                        text_runs += (" " + run.text)
-                    except TypeError:
-                        continue
-
-        # SEC575 Specific -- skip slides that are course outline slides
-        if text_runs.find("Course") and text_runs.find("Roadmap"): 
-            words[str(booknum)+ ":" + str(page)] = ""
-        else:
-            words[str(booknum)+ ":" + str(page)] = text_runs
-    return words
 
 # Validate the contents of the concordance file
 def checkconcordance(concordancefile):
@@ -194,7 +182,7 @@ def showconcordancehits(concordancehits, concordance):
 
 
 def usage(status=0):
-    print "pptxindex v1.0.1"
+    print "pptxindex v1.0.2"
     print "Usage: pptxindex.py -c <CONCORDANCE> [-o WORDFILE] [-i WORDFILE] [PPTX FILES]"
     print "                          [-h] [-t]"
     print "     -c <CONCORDANCE>    Specify the concordance filename"
@@ -273,19 +261,18 @@ if __name__ == "__main__":
     wordsbypage = {}
     booknum=1
     for pptxfile in pptxfiles:
-        try:
-            prs = Presentation(pptxfile)
-        except Exception:
-            sys.stderr.write("Invalid PPTX file: " + pptxfile + "\n")
+        if os.path.splitext(pptxfile.lower())[1] != ".pptx":
+            sys.stderr.write("Cannot process non-pptx filename \"%s\", exiting.\n"%pptxfile)
             sys.exit(-1)
-        
-        wordsbypage = parseslidetext(prs,wordsbypage,booknum)
         try:
-            wordsbypage = parseslidenotes(pptxfile,wordsbypage,booknum)
+            # Retrieve slide and notes text for each slide in pptx file
+            wordsbypage = parseslidecontent(pptxfile, wordsbypage, booknum, verbose)
+        except zipfile.BadZipfile:
+            sys.stderr.write("Invalid pptx file \"%s\", exiting.\n"%pptxfile)
+            sys.exit(-1)
         except:
             print "Unexpected error:", sys.exc_info()[0]
             sys.exit(-1)
-            
         booknum+=1
 
     # Next, iterate through the concordance dictionary, searching for and recording
