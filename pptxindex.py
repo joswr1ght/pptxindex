@@ -161,24 +161,25 @@ def indexsort(string):
     page = re.sub('-.*', "", page)
     return int(book)*(int(page)+1000)
 
-def showconcordancehits(concordancehits, concordance):
-    # Count the number of hits in the concordancehits dictionary
-    # where val != None
+
+def showconcordancehits(index, concordance):
+    print "Concordance matches:"
     nohitcount=0
-    for key in concordancehits:
-        if concordancehits[key] == None:
+    for key in concordance:
+        # The concordance key will not be present in the index list unless it was present
+        # in the PPTX file. The except here is for concordance entries that did not produce
+        # a match.
+        try:
+            rangedmatches = len(index[key])
+            # left justify the key name with 52 spaces - may need to be adjusted
+            print "\t%s%d ranged matches."%(key.ljust(52), rangedmatches)
+        except KeyError:
            nohitcount+=1
+           print "\t%s0 matches."%(key.ljust(52))
+
     if nohitcount == 0:
         print "All entries in the concordance file produced matches."
         return
-    else:
-        print "The following entries in the concordance file did not produce matches:"
-        for key in concordancehits:
-            if concordancehits[key] == None:
-                if concordance[key] == None:
-                    print "\t" + key
-                else:
-                    print "\t" + key + " : " + concordance[key]
 
 
 def usage(status=0):
@@ -279,13 +280,11 @@ if __name__ == "__main__":
     # matches for each entry.
     print("Searching for matches with the concordance file.")
     index = {}
-    concordancehits = {}
     for key in concordance:
         pages = [] # list of page numbers
         for bookpagenum in wordsbypage:
             # To track hits with concordance entries, mark hits for this
             # entry to None by default.
-            concordancehits[key] = None
 
             # These are the variables intended to be accessible by the author in the concordance file
             cspage = wordsbypage[bookpagenum]
@@ -304,10 +303,9 @@ if __name__ == "__main__":
             # If the concordance entry generated some matches, add it to the index list
             if pages != []:
                 index[key] = pages
-                concordancehits[key] = True
 
     if verbose:
-        showconcordancehits(concordancehits, concordance)
+        showconcordancehits(index, concordance)
 
     # Reduce index entries "1:1,1:2,1:3" to 1:1-3"
     print("Creating index reference ranges.")
