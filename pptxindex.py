@@ -46,7 +46,7 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
         text = text.encode('ascii', 'ignore')
         if "Course Roadmap" in text:
             if verbose:
-                print "Skipping page %d, \"Course Roadmap\" slide."%page
+                print "Skipping page %d:%d, \"Course Roadmap\" slide."%(booknum,page)
             skippages.append(page)
             words[str(booknum) + ":" + str(page)] = ''
         else:
@@ -91,8 +91,14 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
 
 # Validate the contents of the concordance file
 def checkconcordance(concordancefile):
+    # Declared empty here, just for validating concordance rules
     page = ""
     cspage = ""
+    booknum = 0
+    pagenum = 0
+    wordlist = ""
+    cswordlist = ""
+
     ret=0
     lineno=0
     for line in open(concordancefile):
@@ -290,6 +296,8 @@ if __name__ == "__main__":
             cspage = wordsbypage[bookpagenum]
             page = wordsbypage[bookpagenum].lower()
             booknum,pagenum = bookpagenum.split(":")
+            wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
+            cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
             # Process the concordance file entry.  If it is None, then use 
             # the key as the search string
