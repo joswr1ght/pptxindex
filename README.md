@@ -159,7 +159,7 @@ In this example, the index entry for "Penetration Testing, Mobile" will only app
 
 ```
 $ cat concordance.txt
-Open Handset Alliance (OHA);"open handset alliance" in page or "OHA" in cswords
+Open Handset Alliance (OHA);"open handset alliance" in page or "OHA" in cswordlist
 ```
 
 In this example, the string "open handset alliance" can appear anywhere in the page to register an index hit, or the letters "OHA" must appear as a word in a sentence of bullet (but not matching "aloha", for example).
@@ -194,4 +194,3 @@ In this naming convention, the file "Sec575_MobDevRecommend_3_A09.pptx" would be
 Open a ticket, or drop me a note: jwright@hasborg.com.
 
 -Josh
-
