@@ -11,6 +11,12 @@ On Linux or Mac OS X systems, install the `python-docx` package using `pip`:
 $ pip install python-docx
 ```
 
+If you don't have the `pip` utility, install it with the following command, then run the `pip` command, above:
+
+```
+$ sudo easy_install pip
+```
+
 ## Windows Installation
 
 Windows users will need to install Python before using pptxindex.  Download and install Python 2.7 from https://www.python.org/downloads/windows.  After installation, add `C:\Python27` and `C:\Python27\scripts` to your PATH environment variable to make it easier to run from the command line.
