@@ -93,7 +93,7 @@ $ ls -l Sec575_A09_Index.docx
 
 ## Building a Concordance
 
-The concordance file is the file by which you specify the entries that will be used to generate your index.  Your concordance file can be cery simple, matching a list of keywords to use when populating the index document, or it can be complex using Pythonic expressions.
+The concordance file is the file by which you specify the entries that will be used to generate your index.  Your concordance file can be very simple, matching a list of keywords to use when populating the index document, or it can be complex using Pythonic expressions.
 
 The concordance file is a simple text file, in either Windows or Unix format.  Lines beginning with a "#" are ignored as comments.  Blank lines are also ignored.
 
