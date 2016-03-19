@@ -117,14 +117,12 @@ SQL Injection, Testing Risk;"sql injection" in page and "testing risk" in page
 
 Here, two concordance entries are used to index content associated with SQL injection.  The content to the left of the semi-colon is the string used in the index output.  The content to the right of the semi-colon is a Python expression returning a Boolean expression.
 
-The Python expressions in the concordance can be almost anything that is valid Python, referring to one of six internal variables:
+The Python expressions in the concordance can be almost anything that is valid Python, referring to one of four internal variables:
 
 1. `page` - The `page` variable contains all the content from an individual page in one or more PowerPoint documents, converted to all lowercase characters.
 2. `cspage` - The `cspage` variable is similar to `page`, except that it is case sentitive.
 3. `pagenum` - The `pagenum` variable is the current page number being evaluated in the PowerPoint file.
 4. `booknum` - The `booknum` variable is the current book number (see "On Page Numbering" below) in the PowerPoint file.
-5. `wordlist` - The `wordlist` variable is a collection of each individual word on the page with punctuation and other special characters removed.  Use `wordlist` when you want to match a specific word but not when that word might appear *inside* of another word (e.g. match "APT", but not "captive")
-6. `cswordlist` - The `cswordlist` variable is similar to `wordlist`, except that it is case sensitive.  This is particularly useful for matching acronyms.
 
 In the first example from the concordance file, the string "SQL Injection" will be added to the index if the Python expression to the right of the semi-colon evaluates to True.  Here, the expression will be True if the string "sql injection" is present in any given PowerPoint page.  This functionality is identical to a concordance entry of simply "SQL Injection" with no expression following a semi-colon.
 
@@ -157,12 +155,6 @@ Penetration Testing, Mobile;("pentest" in page or "pen test" in page or "penetra
 
 In this example, the index entry for "Penetration Testing, Mobile" will only appear when the strings "pentest", "pen test" or "penetration testing" appear, and the book is the 2nd or 3rd PowerPoint file in the list of files.
 
-```
-$ cat concordance.txt
-Open Handset Alliance (OHA);"open handset alliance" in page or "OHA" in cswords
-```
-
-In this example, the string "open handset alliance" can appear anywhere in the page to register an index hit, or the letters "OHA" must appear as a word in a sentence of bullet (but not matching "aloha", for example).
 
 ## On Page Numbering
 
