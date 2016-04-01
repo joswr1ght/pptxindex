@@ -21,8 +21,23 @@ import string
 import zipfile
 
 
+# Parse the given root recursively (root is intended to be the paragraph element <a:p>
+# If we encounter a link-break element a:br, add a new line to global paragraphtext
+# If we encounter an element with type TEXT_NODE, append value to paragraphtext
+paragraphtext=""
+def parse_node(root):
+    global paragraphtext
+    if root.childNodes:
+        for node in root.childNodes:
+            if node.nodeType == node.TEXT_NODE:
+                paragraphtext += node.nodeValue.encode('ascii', 'ignore')
+            if node.nodeType == node.ELEMENT_NODE:
+                if node.tagName == 'a:br':
+                    paragraphtext += "\n" 
+                parse_node(node)
 
 def parseslidecontent(pptxfile, words, booknum, verbose=False):
+    global paragraphtext
     skippages = []
     tmpd = tempfile.mkdtemp()
     zipfile.ZipFile(pptxfile).extractall(path=tmpd, pwd=None)
@@ -46,7 +61,7 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
         text = text.encode('ascii', 'ignore')
         if "Course Roadmap" in text:
             if verbose:
-                print "Skipping page %d, \"Course Roadmap\" slide."%page
+                print "Skipping page %d:%d, \"Course Roadmap\" slide."%(booknum,page)
             skippages.append(page)
             words[str(booknum) + ":" + str(page)] = ''
         else:
@@ -55,28 +70,25 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
     # Next, parse notes content, skipping pages previously identified
     path = tmpd + '/ppt/notesSlides/'
     for infile in glob.glob(os.path.join(path, '*.xml')):
-        #parse each XML notes file from the notes folder.
+
+        # Get the slide number
         dom = parse(infile)
         noteslist = dom.getElementsByTagName('a:t')
+        pagenum = noteslist.pop()
+        pagenum = pagenum.toxml().replace('<a:t>', '').replace('</a:t>', '')
 
-        # The page number is part of the filename
-        page = int(re.sub(r'\D', "", infile.split("/")[-1]))
-        if page in skippages:
-            # Skip this page previously identified with slide text
+        if pagenum in skippages:
+            # Skip this page previously identified with "Course Roadmap" title text
             continue
 
-        # Create dictionary entry without content
-        text = ''
+        # Parse slide notes, adding a space after each paragraph marker, and removing XML markup
+        paragraphs=dom.getElementsByTagName('a:p')
+        for paragraph in paragraphs:
+            paragraphtext=""
+            parse_node(paragraph)
+            #print "DEBUG: " + paragraphtext
 
-        for node in noteslist:
-            xmlTag = node.toxml()
-            xmlData = xmlTag.replace('<a:t>', '').replace('</a:t>', '')
-            #concatenate the xmlData to the text for the particular slideNumber index.
-            text += " " + xmlData
-
-        # Convert to ascii to simplify
-        text = text.encode('ascii', 'ignore')
-        words[str(booknum) + ":" + str(page)] += " " + text
+        words[str(booknum) + ":" + str(page)] += " " + paragraphtext
 
     # Remove all the files created with unzip
     shutil.rmtree(tmpd)
@@ -91,8 +103,14 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
 
 # Validate the contents of the concordance file
 def checkconcordance(concordancefile):
+    # Declared empty here, just for validating concordance rules
     page = ""
     cspage = ""
+    booknum = 0
+    pagenum = 0
+    wordlist = ""
+    cswordlist = ""
+
     ret=0
     lineno=0
     for line in open(concordancefile):
@@ -290,6 +308,8 @@ if __name__ == "__main__":
             cspage = wordsbypage[bookpagenum]
             page = wordsbypage[bookpagenum].lower()
             booknum,pagenum = bookpagenum.split(":")
+            wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
+            cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
             # Process the concordance file entry.  If it is None, then use 
             # the key as the search string
@@ -318,12 +338,20 @@ if __name__ == "__main__":
     # With index list created, make the Word document
     print("Creating index document.")
     document = Document(templatefile)
-    if templatefile != None:
-        document.add_page_break()
+    #if templatefile != None:
+    #    document.add_page_break()
     
-    document.add_heading('Index', level=1)
     table = document.add_table(rows=0, cols=2, style="Light Shading")
+    l2marker=""
     for entry in sorted(index.keys(), key=str.lower):
+        if entry == '': continue
+        #pdb.set_trace()
+        currentmarker = ord(entry[0].upper())
+        if currentmarker > 64: # "A" or after
+            if l2marker != currentmarker:
+                document.add_heading(entry[0].upper(), level=1)
+                table = document.add_table(rows=0, cols=2, style="Light Shading")
+                l2marker=currentmarker
         row_cells = table.add_row().cells
         row_cells[0].text = entry
         row_cells[1].text = ", ".join(index[entry])
