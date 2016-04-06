@@ -307,7 +307,7 @@ if __name__ == "__main__":
 
     # With index list created, make the Word document
     print("Creating index document.")
-    document = Document(templatefile)
+    document = Document(args.template)
     #if templatefile != None:
     #    document.add_page_break()
     
