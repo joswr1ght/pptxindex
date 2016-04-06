@@ -15,7 +15,7 @@ import shutil
 import glob
 import tempfile
 import operator
-import getopt
+import argparse
 import pdb
 import string
 import zipfile
@@ -47,9 +47,8 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
     for infile in glob.glob(os.path.join(path, '*.xml')):
         #parse each XML notes file from the notes folder.
         dom = parse(infile)
-
         noteslist = dom.getElementsByTagName('a:t')
-        page = int(re.sub(r'\D', "", infile.split("/")[-1]))
+        page = re.sub(r'\D', "", infile.split("/")[-1])
         text = ''
 
         for node in noteslist:
@@ -61,27 +60,25 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
         text = text.encode('ascii', 'ignore')
         if "Course Roadmap" in text:
             if verbose:
-                print "Skipping page %d:%d, \"Course Roadmap\" slide."%(booknum,page)
+                print "Skipping page %d:%s, \"Course Roadmap\" slide."%(booknum,page)
             skippages.append(page)
-            words[str(booknum) + ":" + str(page)] = ''
+            words[str(booknum) + ":" + page] = ''
         else:
-            words[str(booknum) + ":" + str(page)] = text
+            words[str(booknum) + ":" + page] = text
 
     # Next, parse notes content, skipping pages previously identified
     path = tmpd + '/ppt/notesSlides/'
     for infile in glob.glob(os.path.join(path, '*.xml')):
 
         # Get the slide number
-        dom = parse(infile)
-        noteslist = dom.getElementsByTagName('a:t')
-        pagenum = noteslist.pop()
-        pagenum = pagenum.toxml().replace('<a:t>', '').replace('</a:t>', '')
+        page = re.sub(r'\D', "", infile.split("/")[-1])
 
-        if pagenum in skippages:
+        if page in skippages:
             # Skip this page previously identified with "Course Roadmap" title text
             continue
 
         # Parse slide notes, adding a space after each paragraph marker, and removing XML markup
+        dom = parse(infile)
         paragraphs=dom.getElementsByTagName('a:p')
         for paragraph in paragraphs:
             paragraphtext=""
@@ -199,18 +196,11 @@ def showconcordancehits(index, concordance):
         print "All entries in the concordance file produced matches."
         return
 
-
-def usage(status=0):
-    print "pptxindex v1.0.2"
-    print "Usage: pptxindex.py -c <CONCORDANCE> [-o WORDFILE] [-i WORDFILE] [PPTX FILES]"
-    print "                          [-h] [-t]"
-    print "     -c <CONCORDANCE>    Specify the concordance filename"
-    print "     -o <WORDFILE>       Specify the MS Word index output filename"
-    print "     -i <WORDFILE>       Specify the MS Word template file to base index on"
-    print "     -t                  Test and validate concordance file syntax, then exit"
-    print "     -v                  Verbose output (including 0-hit concordance entries)"
-    print "     -h                  This usage information"
-    sys.exit(status)
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+        parser.error("The file %s does not exist!" % arg)
+    else:
+        return open(arg, 'r')  # return an open file handle
 
 if __name__ == "__main__":
 
@@ -220,43 +210,30 @@ if __name__ == "__main__":
     templatefile    = None
     verbose         = False
 
-    if len(sys.argv) == 1: usage(0)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--concordance', dest='concordance', help='concordance filename', type=lambda x: is_valid_file(parser, x), required=True)
+    parser.add_argument('-o', '--outfile', dest='outfile', help='MS Word index output filename', metavar='output.docx', type=argparse.FileType('w'))
+    parser.add_argument('-i', '--template', dest='template', help='MS Word template file to base index on', metavar='Template.docx', type=argparse.FileType('r'))
+    parser.add_argument('-t', '--test', help='Test and validate concordance file syntax, then exit', action='store_true')
+    parser.add_argument('-v', '--verbose', help='Verbose output (including 0-hit concordance entries)', action='store_true')
+    parser.add_argument('pptxfiles', type=lambda x: is_valid_file(parser, x), action='store', nargs='+')
 
-    opts = getopt.getopt(sys.argv[1:],"i:c:o:htv")
-    
-    for opt,optarg in opts[0]:
-        if opt == "-c":
-            concordancefile = optarg
-        elif opt == "-o":
-            indexoutputfile = optarg
-        elif opt == "-i":
-            templatefile = optarg
-        elif opt == "-t":
-            testandexit = True
-        elif opt == "-v":
-            verbose = True
-        elif opt == "-h":
-            usage()
-    
-    if not concordancefile:
-        print "Error: concordance file not specified"
-        usage()
-
-    if not indexoutputfile:
-        indexoutputfile = concordancefile + ".docx"
+    args = parser.parse_args()
+    if not args.outfile:
+        args.outfile = is_valid_file(parser, args.concordance.name + ".docx")
 
     # Check all the expressions in the concordance file
-    if (checkconcordance(concordancefile) != 0):
+    if (checkconcordance(args.concordance.name) != 0):
         sys.stderr.write("Please correct the errors in the concordance file and try again.\n")
         sys.exit(-1)
 
-    if testandexit:
+    if args.test:
         print("No errors in the concordance file.")
         sys.exit(0)
 
     # Read concordance file and build the dictionary
     concordance = {}
-    for line in open(concordancefile):
+    for line in args.concordance:
         if line[0] == "#" or line == "^$": continue
         try:
             key,val = line.strip().split(";")
@@ -264,28 +241,21 @@ if __name__ == "__main__":
         except ValueError:
             concordance[line.strip()] = None
     
+    args.pptxfiles.sort(key=lambda f: f.name)
 
-    # Handle globbing for pptx filenames on Windows
-    pptxfiles = []
-    for filemask in opts[1:][0]:
-        pptxfiles += glob.glob(filemask)
-    if len(pptxfiles) == 0:
-        sys.stderr.write("No matching PPTX files found.\n")
-        sys.exit(1)
-    pptxfiles.sort()
-    if verbose:
-        print("Processing PPTX files: %s")%' '.join(os.path.basename(x) for x in pptxfiles)
+    if args.verbose:
+        print("Processing PPTX files: %s")%' '.join(os.path.basename(x.name) for x in args.pptxfiles)
 
     print("Extracting content from PPTX files.")
     wordsbypage = {}
     booknum=1
-    for pptxfile in pptxfiles:
-        if os.path.splitext(pptxfile.lower())[1] != ".pptx":
+    for pptxfile in args.pptxfiles:
+        if os.path.splitext(pptxfile.name.lower())[1] != ".pptx":
             sys.stderr.write("Cannot process non-pptx filename \"%s\", exiting.\n"%pptxfile)
             sys.exit(-1)
         try:
             # Retrieve slide and notes text for each slide in pptx file
-            wordsbypage = parseslidecontent(pptxfile, wordsbypage, booknum, verbose)
+            wordsbypage = parseslidecontent(pptxfile.name, wordsbypage, booknum, args.verbose)
         except zipfile.BadZipfile:
             sys.stderr.write("Invalid pptx file \"%s\", exiting.\n"%pptxfile)
             sys.exit(-1)
@@ -324,7 +294,7 @@ if __name__ == "__main__":
             if pages != []:
                 index[key] = pages
 
-    if verbose:
+    if args.verbose:
         showconcordancehits(index, concordance)
 
     # Reduce index entries "1:1,1:2,1:3" to 1:1-3"
@@ -356,5 +326,6 @@ if __name__ == "__main__":
         row_cells[0].text = entry
         row_cells[1].text = ", ".join(index[entry])
 
-    document.save(indexoutputfile)
+    args.outfile.close()
+    document.save(args.outfile.name)
     print("Done.")
