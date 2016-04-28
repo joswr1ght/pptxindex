@@ -225,8 +225,14 @@ if __name__ == "__main__":
         sys.stderr.write("Please correct the errors in the concordance file and try again.\n")
         sys.exit(-1)
 
+    # perform a test if need bee
     if args.test:
         print("No errors in the concordance file.")
+        sys.exit(0)
+
+    # ensure that pptxfiles are provided
+    if len(args.pptxfiles) == 0:
+        print("No pptx files provided")
         sys.exit(0)
 
     if not args.outfile:
