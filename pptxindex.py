@@ -216,21 +216,28 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--template', dest='template', help='MS Word template file to base index on', metavar='Template.docx', type=argparse.FileType('r'))
     parser.add_argument('-t', '--test', help='Test and validate concordance file syntax, then exit', action='store_true')
     parser.add_argument('-v', '--verbose', help='Verbose output (including 0-hit concordance entries)', action='store_true')
-    parser.add_argument('pptxfiles', type=lambda x: is_valid_file(parser, x), action='store', nargs='+')
+    parser.add_argument('pptxfiles', type=lambda x: is_valid_file(parser, x), action='store', nargs='*')
 
     args = parser.parse_args()
-    if not args.outfile:
-        args.outfile = is_valid_file(parser, args.concordance.name + ".docx")
 
     # Check all the expressions in the concordance file
     if (checkconcordance(args.concordance.name) != 0):
         sys.stderr.write("Please correct the errors in the concordance file and try again.\n")
         sys.exit(-1)
 
+    # perform a test if need bee
     if args.test:
         print("No errors in the concordance file.")
         sys.exit(0)
 
+    # ensure that pptxfiles are provided
+    if len(args.pptxfiles) == 0:
+        print("No pptx files provided")
+        sys.exit(0)
+
+    if not args.outfile:
+        args.outfile = is_valid_file(parser, args.concordance.name + ".docx")
+        
     # Read concordance file and build the dictionary
     concordance = {}
     for line in args.concordance:
