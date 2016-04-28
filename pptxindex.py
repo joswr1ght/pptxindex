@@ -236,7 +236,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if not args.outfile:
-        args.outfile = is_valid_file(parser, args.concordance.name + ".docx")
+        args.outfile = open(args.concordance.name + ".docx", 'w')
         
     # Read concordance file and build the dictionary
     concordance = {}
