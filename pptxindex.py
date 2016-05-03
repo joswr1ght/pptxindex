@@ -110,10 +110,10 @@ def checkconcordance(concordancefile):
 
     ret=0
     lineno=0
-    for line in open(concordancefile):
+    for line in open(concordancefile,"rU"):
         expression = None
         lineno+=1
-        if line[0] == "#" or line == "\n" or line == "\r\n" or line.isspace(): continue
+        if line[0] == "#" or line == "\n" or line.isspace(): continue
         try:
             key,expression = line.strip().split(";")
         except ValueError:
@@ -240,8 +240,8 @@ if __name__ == "__main__":
         
     # Read concordance file and build the dictionary
     concordance = {}
-    for line in args.concordance:
-        if line[0] == "#" or line == "^$": continue
+    for line in open(args.concordance.name,"U"):
+        if line[0] == "#" or line == "\n" or line.isspace(): continue
         try:
             key,val = line.strip().split(";")
             concordance[key] = val
