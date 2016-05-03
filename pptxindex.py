@@ -85,7 +85,7 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
             parse_node(paragraph)
             #print "DEBUG: " + paragraphtext
 
-        words[str(booknum) + ":" + str(page)] += " " + paragraphtext
+            words[str(booknum) + ":" + str(page)] += " " + paragraphtext
 
     # Remove all the files created with unzip
     shutil.rmtree(tmpd)
