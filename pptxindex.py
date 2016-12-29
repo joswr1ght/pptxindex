@@ -92,7 +92,7 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
 
     # Remove double-spaces which happens in the content occasionally
     for page in words:
-        words[page] = ''.join(ch for ch in words[page] if ch not in set([',','(',')']))
+        words[page] = ''.join(ch for ch in words[page] if ch not in set([',']))
         words[page] = re.sub('\. ', " ", words[page])
         words[page] = ' '.join(words[page].split())
     return words
