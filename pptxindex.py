@@ -30,7 +30,7 @@ def parse_node(root):
     if root.childNodes:
         for node in root.childNodes:
             if node.nodeType == node.TEXT_NODE:
-                paragraphtext += node.nodeValue.encode('ascii', 'ignore')
+                paragraphtext += node.nodeValue
             if node.nodeType == node.ELEMENT_NODE:
                 if node.tagName == 'a:br':
                     paragraphtext += "\n" 
@@ -57,14 +57,14 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
             text += " " + xmlData
 
         # Convert to ascii to simplify
-        text = text.encode('ascii', 'ignore')
+        #text = text.encode('ascii', 'ignore')
         if "Course Roadmap" in text:
             if verbose:
-                print "Skipping page %d:%s, \"Course Roadmap\" slide."%(booknum,page)
+                print(("Skipping page %d:%s, \"Course Roadmap\" slide."%(booknum, page)))
             skippages.append(page)
             words[str(booknum) + ":" + page] = ''
         else:
-            words[str(booknum) + ":" + page] = text
+            words[str(booknum) + ":" + page] = str(text)
 
     # Next, parse notes content, skipping pages previously identified
     path = tmpd + '/ppt/notesSlides/'
@@ -83,16 +83,16 @@ def parseslidecontent(pptxfile, words, booknum, verbose=False):
         for paragraph in paragraphs:
             paragraphtext=""
             parse_node(paragraph)
-            #print "DEBUG: " + paragraphtext
+            #print("DEBUG: " + paragraphtext)
 
-            words[str(booknum) + ":" + str(page)] += " " + paragraphtext
+            words[str(booknum) + ":" + str(page)] += " " + str(paragraphtext)
 
     # Remove all the files created with unzip
     shutil.rmtree(tmpd)
 
     # Remove double-spaces which happens in the content occasionally
     for page in words:
-        words[page] = ''.join(ch for ch in words[page] if ch not in set([',']))
+        words[page] = ''.join(ch for ch in words[page] if ch not in {','})
         words[page] = re.sub('\. ', " ", words[page])
         words[page] = ' '.join(words[page].split())
     return words
@@ -110,19 +110,19 @@ def checkconcordance(concordancefile):
 
     ret=0
     lineno=0
-    for line in open(concordancefile,"rU"):
+    for line in open(concordancefile, "r"):
         expression = None
         lineno+=1
         if line[0] == "#" or line == "\n" or line.isspace(): continue
         try:
-            key,expression = line.strip().split(";")
+            key, expression = line.strip().split(";")
         except ValueError:
             # Explicit search term, continue
             continue
         if expression != None:
             try:
                 eval(expression)
-            except Exception, e:
+            except Exception as e:
                 ret=1
                 sys.stdout.write("Error processing concordance file line " + str(lineno) + ": ")
                 sys.stdout.write(str(e))
@@ -138,7 +138,7 @@ def indexreduce(index):
         matchesbybook = {}
         pages=index[entry]
         for bookpage in pages:
-            book,page = bookpage.split(":")
+            book, page = bookpage.split(":")
             page = int(page)
             try:
                 matchesbybook[book].append(page)
@@ -161,9 +161,9 @@ def indexreduce(index):
 # sequential values.
 def numreduce(data):
     str_list = []
-    for k, g in groupby(enumerate(data), lambda (i,x):i-x):
-       ilist = map(itemgetter(1), g)
-       #print ilist
+    for k, g in groupby(enumerate(data), lambda i_x:i_x[0]-i_x[1]):
+       ilist = list(map(itemgetter(1), g))
+       #print(ilist)
        if len(ilist) > 1:
           str_list.append('%d-%d' % (ilist[0], ilist[-1]))
        else:
@@ -172,13 +172,13 @@ def numreduce(data):
 
 
 def indexsort(string):
-    book,page = string.split(":")
+    book, page = string.split(":")
     page = re.sub('-.*', "", page)
     return int(book)*(int(page)+1000)
 
 
 def showconcordancehits(index, concordance):
-    print "Concordance matches:"
+    print("Concordance matches:")
     nohitcount=0
     for key in concordance:
         # The concordance key will not be present in the index list unless it was present
@@ -187,13 +187,13 @@ def showconcordancehits(index, concordance):
         try:
             rangedmatches = len(index[key])
             # left justify the key name with 52 spaces - may need to be adjusted
-            print "\t%s%d ranged matches."%(key.ljust(52), rangedmatches)
+            print(("\t%s%d ranged matches."%(key.ljust(52), rangedmatches)))
         except KeyError:
            nohitcount+=1
-           print "\t%s0 matches."%(key.ljust(52))
+           print(("\t%s0 matches."%(key.ljust(52))))
 
     if nohitcount == 0:
-        print "All entries in the concordance file produced matches."
+        print("All entries in the concordance file produced matches.")
         return
 
 def is_valid_file(parser, arg):
@@ -237,21 +237,21 @@ if __name__ == "__main__":
 
     if not args.outfile:
         args.outfile = open(args.concordance.name + ".docx", "w")
-        
+
     # Read concordance file and build the dictionary
     concordance = {}
-    for line in open(args.concordance.name,"U"):
+    for line in open(args.concordance.name, "r"):
         if line[0] == "#" or line == "\n" or line.isspace(): continue
         try:
-            key,val = line.strip().split(";")
+            key, val = line.strip().split(";")
             concordance[key] = val
         except ValueError:
             concordance[line.strip()] = None
-    
+
     args.pptxfiles.sort(key=lambda f: f.name)
 
     if args.verbose:
-        print("Processing PPTX files: %s")%' '.join(os.path.basename(x.name) for x in args.pptxfiles)
+        print(("Processing PPTX files: %s")%' '.join(os.path.basename(x.name) for x in args.pptxfiles))
 
     print("Extracting content from PPTX files.")
     wordsbypage = {}
@@ -267,7 +267,7 @@ if __name__ == "__main__":
             sys.stderr.write("Invalid pptx file \"%s\", exiting.\n"%pptxfile)
             sys.exit(-1)
         except:
-            print "Unexpected error:", sys.exc_info()[0]
+            print(("Unexpected error:", sys.exc_info()[0]))
             sys.exit(-1)
         booknum+=1
 
@@ -284,7 +284,7 @@ if __name__ == "__main__":
             # These are the variables intended to be accessible by the author in the concordance file
             cspage = wordsbypage[bookpagenum]
             page = wordsbypage[bookpagenum].lower()
-            booknum,pagenum = bookpagenum.split(":")
+            booknum, pagenum = bookpagenum.split(":")
             wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
             cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
@@ -314,15 +314,14 @@ if __name__ == "__main__":
 
     # With index list created, make the Word document
     print("Creating index document.")
-    document = Document(args.template)
+    document = Document(args.template.name)
     #if templatefile != None:
     #    document.add_page_break()
     
     table = document.add_table(rows=0, cols=2, style="Light Shading")
     l2marker=""
-    for entry in sorted(index.keys(), key=str.lower):
+    for entry in sorted(list(index.keys()), key=str.lower):
         if entry == '': continue
-        #pdb.set_trace()
         currentmarker = ord(entry[0].upper())
         if currentmarker > 64: # "A" or after
             if l2marker != currentmarker:
