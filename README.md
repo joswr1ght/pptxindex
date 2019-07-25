@@ -22,18 +22,20 @@ $ sudo easy_install pip
 
 ## Windows Binary Installation
 
-Download the `pptxindex.exe` program from the GitHub project `bin/` page. Copy
-it to a location in your system PATH.
+Download the
+[`pptxindex.exe`](https://github.com/joswr1ght/pptxindex/blob/master/bin/pptxindex.exe)
+program from the GitHub project `bin/` folder. Copy it to a location in your
+system PATH.
 
 
 ## Windows Python Installation
 
-Windows users will need to install Python before using pptxindex.  Download and
-install the latest Python 3 from https://www.python.org/downloads/windows.
-During the installation process, add the Python directory to your PATH.
+Instead of using the `pptxindex.exe` binary, Windows can install Python to use
+pptxindex.  Download and install the latest [Python
+3](https://www.python.org/downloads/windowsi).  During the installation
+process, add the Python directory to your PATH.
 
-After installing Python run the `pip` utility to install the python-docx
-dependencies:
+After installing Python run the `pip` utility to install the dependencies:
 
 ```
 C:\temp> pip install python-docx python-pptx
@@ -70,6 +72,7 @@ optional arguments:
 ### Example Usage:
 
 Check the concordance file for validity:
+
 ```
 $ pptxindex.py -c concordance.txt -t  
 No errors in the concordance file.
@@ -92,7 +95,9 @@ $ ls -l concordance.txt.docx
 -rw-r--r--  1 jwright  staff  41536 Aug  6 08:28 concordance.txt.docx
 ```
 
-Generate an index for multiple PowerPoint files, reporting on concordance entries that did not produce matches:
+Generate an index for multiple PowerPoint files, reporting on concordance
+entries that did not produce matches:
+
 ```
 $ ./pptxindex.py -c concordance.txt -v ~/Documents/Sec575_*.pptx
 Processing PPTX files: Sec575_1_A09_RSTR.pptx Sec575_2_A09_RSTR.pptx Sec575_3_A09_RSTR.pptx Sec575_4_A09_RSTR.pptx Sec575_5_A09_RSTR.pptx Sec575_6_A09_RSTR.pptx Sec575_Handout1.pptx
