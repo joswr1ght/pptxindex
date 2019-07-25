@@ -202,6 +202,24 @@ def is_valid_file(parser, arg):
     else:
         return open(arg, 'r')  # return an open file handle
 
+def generatemarkdown(index, fp):
+    fp.write("# Course Index\n\n")
+    # Create MD table heading. This is the opening table for the section that precedes A index items
+    fp.write("| | |\n| --- | --- |\n")
+
+    l2marker=""
+    for entry in sorted(list(index.keys()), key=str.lower):
+        if entry == '': continue
+        currentmarker = ord(entry[0].upper())
+        if currentmarker > 64: # "A" or after
+            if l2marker != currentmarker:
+                l2marker=currentmarker
+                fp.write(f"\n\n## {entry[0].upper()}\n")
+                # Create MD table heading
+                fp.write("| | |\n| --- | --- |\n")
+        fp.write(f"| {entry} | {', '.join(index[entry])} |\n")
+
+
 if __name__ == "__main__":
 
     concordancefile = None
@@ -213,6 +231,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--concordance', dest='concordance', help='concordance filename', type=lambda x: is_valid_file(parser, x), required=True)
     parser.add_argument('-o', '--outfile', dest='outfile', help='MS Word index output filename', metavar='output.docx', type=argparse.FileType('w'))
+    parser.add_argument('-m', '--markdown', dest='markdown', help='Markdown index output filename', metavar='output.md', type=argparse.FileType('w'))
     parser.add_argument('-i', '--template', dest='template', help='MS Word template file to base index on', metavar='Template.docx', type=argparse.FileType('r'))
     parser.add_argument('-t', '--test', help='Test and validate concordance file syntax, then exit', action='store_true')
     parser.add_argument('-v', '--verbose', help='Verbose output (including 0-hit concordance entries)', action='store_true')
@@ -314,10 +333,12 @@ if __name__ == "__main__":
 
     # With index list created, make the Word document
     print("Creating index document.")
-    document = Document(args.template.name)
-    #if templatefile != None:
-    #    document.add_page_break()
-    
+    if (args.template != None):
+        document = Document(args.template.name)
+    else:
+        # No style template
+        document = Document()
+
     table = document.add_table(rows=0, cols=2, style="Light Shading")
     l2marker=""
     for entry in sorted(list(index.keys()), key=str.lower):
@@ -334,4 +355,9 @@ if __name__ == "__main__":
 
     args.outfile.close()
     document.save(args.outfile.name)
+
+    if (args.markdown != None):
+        print("Creating Markdown document.")
+        generatemarkdown(index, args.markdown)
+
     print("Done.")
