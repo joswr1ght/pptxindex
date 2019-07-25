@@ -1,0 +1,9 @@
+# Dev Notes/Reminders
+
+## Building EXE
+
+```
+C:\temp>pip install python-docx python-pptx pyinstaller
+C:\temp>copy z:\dev\pptxindex\pptxindex.py .
+C:\temp>pyinstaller --onefile --upx-exclude "vcruntime140.dll" --hidden-import docx --hidden-import pptx pptxindex.py
+```
