@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # -*- coding: utf-8 -*-
 #
@@ -149,7 +149,7 @@ def indexreduce(index):
             matchesbybook[book].sort()
             matchesbybook[book] = numreduce(matchesbybook[book])
             # Return to 1:66, 2:57 format
-            
+
         index[entry] = []
         for book in matchesbybook:
             for page in matchesbybook[book]:
@@ -209,7 +209,9 @@ def generatemarkdown(index, fp):
 
     l2marker=""
     for entry in sorted(list(index.keys()), key=str.lower):
-        if entry == '': continue
+        if entry == '':
+            continue
+
         currentmarker = ord(entry[0].upper())
         if currentmarker > 64: # "A" or after
             if l2marker != currentmarker:
@@ -328,8 +330,9 @@ if __name__ == "__main__":
     index = indexreduce(index)
 
     # Sort the reduced index entries numerically
-    for page in index:
-        index[page] = sorted(index[page], key=indexsort)
+    # JLW
+#    for page in index:
+#        index[page] = sorted(index[page], key=indexsort)
 
     # With index list created, make the Word document
     print("Creating index document.")
