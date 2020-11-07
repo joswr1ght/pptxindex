@@ -177,9 +177,11 @@ The Python expressions in the concordance can be almost anything that is valid
 Python, referring to one of four internal variables:
 
 1. `page` - The `page` variable contains all the content from an individual page in one or more PowerPoint documents, converted to all lowercase characters.
-2. `cspage` - The `cspage` variable is similar to `page`, except that it is case sentitive.
-3. `pagenum` - The `pagenum` variable is the current page number being evaluated in the PowerPoint file.
-4. `booknum` - The `booknum` variable is the current book number (see "On Page Numbering" below) in the PowerPoint file.
+2. `cspage` - The `cspage` variable is similar to `page`, except that it is case sensitive.
+3. `wordlist` - The `wordlist` variable matches unique words (handling different delimiters such as :space:, but other punctuation as well.
+4. `cswordlist` - The `cswordlist` variable is similar to `wordlist`, except that it is case sensitive. Great for matching acronyms.
+5. `pagenum` - The `pagenum` variable is the current page number being evaluated in the PowerPoint file.
+6. `booknum` - The `booknum` variable is the current book number (see "On Page Numbering" below) in the PowerPoint file.
 
 In the first example from the concordance file, the string "SQL Injection" will
 be added to the index if the Python expression to the right of the semi-colon
