@@ -305,7 +305,8 @@ if __name__ == "__main__":
             # These are the variables intended to be accessible by the author in the concordance file
             cspage = wordsbypage[bookpagenum]
             page = wordsbypage[bookpagenum].lower()
-            booknum, pagenum = bookpagenum.split(":")
+            booknum = int(bookpagenum.split(":")[0])
+            pagenum = int(bookpagenum.split(":")[1])
             wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
             cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
