@@ -1,0 +1,43 @@
+# Comments are ignored
+
+# Blank lines are ignored too
+# See README.md for more tips on building a concordance file.
+0 day
+0day
+abort
+black box
+black market
+black or white
+blacklisted
+child pornography
+chinese wall
+crazy
+data whitening
+dmz
+dumb
+fat-finger
+first-class citizen
+ghetto
+grandfather clause
+grandfathering
+grey box
+guys
+hang
+lame
+man in the middle
+master
+master branch
+murder board
+patient zero
+poc
+rule of thumb
+segregation
+slave
+white box
+white market
+white noise
+white team
+white cell
+whitelisted
+whitelisting
+whitepaper
