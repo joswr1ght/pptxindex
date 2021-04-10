@@ -310,10 +310,17 @@ if __name__ == "__main__":
             wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
             cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
-            # Process the concordance file entry.  If it is None, then use 
+            # Process the concordance file entry.  If it is None, then use
             # the key as the search string
             if concordance[key] == None:
-                if (key.lower() in page):
+                if len(key.split()) == 1:
+                    # The page.split() below cuts up the string page variable into a list
+                    # which makes it more accurate in finding a single word
+                    if (key.lower() in page.split()):
+                        pages.append(bookpagenum)
+                else:
+                    # Here we search the page string (not list) for multi-word keys
+                    if key.lower() in page:
                         pages.append(bookpagenum)
             # Else, evaluate the right-side of the concordance entry as a Python expression
             elif eval(concordance[key]):
