@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+# /// script
+# dependencies = [
+#     "python-docx",
+#     "python-pptx",
+# ]
+# ///
+
 # -*- coding: utf-8 -*-
 #
 
@@ -33,7 +40,7 @@ def parse_node(root):
                 paragraphtext += node.nodeValue
             if node.nodeType == node.ELEMENT_NODE:
                 if node.tagName == 'a:br':
-                    paragraphtext += "\n" 
+                    paragraphtext += "\n"
                 parse_node(node)
 
 def parseslidecontent(pptxfile, words, booknum, verbose=False):
@@ -168,7 +175,7 @@ def numreduce(data):
           str_list.append('%d-%d' % (ilist[0], ilist[-1]))
        else:
           str_list.append('%d' % ilist[0])
-    return str_list 
+    return str_list
 
 
 def indexsort(string):
@@ -310,7 +317,7 @@ if __name__ == "__main__":
             wordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", page)
             cswordlist = re.split("(?:(?:[^a-zA-Z]+')|(?:'[^a-zA-Z]+))|(?:[^a-zA-Z']+)", cspage)
 
-            # Process the concordance file entry.  If it is None, then use 
+            # Process the concordance file entry.  If it is None, then use
             # the key as the search string
             if concordance[key] == None:
                 if (key.lower() in page):
