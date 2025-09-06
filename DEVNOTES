@@ -1,9 +1,17 @@
 # Dev Notes/Reminders
 
-## Building EXE
+## Building EXE - Pyinstaller
 
 ```
 C:\temp>pip install python-docx python-pptx pyinstaller
 C:\temp>copy z:\dev\pptxindex\pptxindex.py .
 C:\temp>pyinstaller --onefile --upx-exclude "vcruntime140.dll" --hidden-import docx --hidden-import pptx pptxindex.py
+```
+
+## Building an EXE - Nuitka
+
+Use gcc.exe
+
+```
+nuitka --onefile --no-deployment-flag=self-execution pptxindex.py
 ```
